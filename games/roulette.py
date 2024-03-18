@@ -1,4 +1,3 @@
-from enum import Enum
 import random
 from collections import namedtuple
 
@@ -8,10 +7,11 @@ class RouletteError(Exception):
         super().__init__(self.message)
 
 # Mapping roulette options to payout
-class Color(Enum):
-    RED = 2
-    BLACK = 2.01
-    GREEN = 14
+Color = {
+    "RED": 2,
+    "BLACK": 2,
+    "GREEN": 14
+}
 
 Bet = namedtuple("Bet", ["color", "value"])
 
@@ -25,11 +25,11 @@ def validateBets(*args):
         color = None
         try:
             if bet.color.lower().startswith("r"):
-                color = Color.RED
+                color = "RED"
             elif bet.color.lower().startswith("b"):
-                color = Color.BLACK
+                color = "BLACK"
             elif bet.color.lower().startswith("g"):
-                color = Color.GREEN
+                color = "GREEN"
             else:
                 raise RouletteError("Unidentified color for bet. Please provide a valid color. (Red/Black/Green)")
         except AttributeError:
@@ -37,6 +37,8 @@ def validateBets(*args):
         
         try:
             value = int(bet.value)
+            if value <= 0:
+                raise RouletteError("The minimum amount to bet is 1")
             bets.append(Bet(color=color, value=value))
         except ValueError:
             raise RouletteError("The bet amount must be numerical")
@@ -51,22 +53,26 @@ def play(*args):
             bets.append(Bet(args[i], args[i+1]))
     except IndexError:
         raise RouletteError("Invalid bets. Bets must contain a color and a value")
+    
+    if (len(args) < 2):
+        raise RouletteError("Invalid bets. Bets must contain a color and a value")
+    
     bets = validateBets(bets)
 
     # Generate winning color
     spin = roll()
     winning_color = None
     if spin == 0:
-        winning_color = Color.GREEN
+        winning_color = "GREEN"
     elif spin %2 == 0:
-        winning_color = Color.BLACK
+        winning_color = "BLACK"
     else:
-        winning_color = Color.RED
+        winning_color = "RED"
 
     prize = 0
     for bet in bets:
         if bet.color == winning_color:
-            prize += int(bet.value * bet.color.value)
+            prize += int(bet.value * Color[bet.color])
 
     return prize
 
