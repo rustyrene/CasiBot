@@ -72,9 +72,11 @@ def play(*args):
     prize = 0
     for bet in bets:
         if bet.color == winning_color:
-            prize += int(bet.value * Color[bet.color])
+            prize += int(bet.value)
+        else:
+            prize -= int(bet.value)
 
-    return prize
+    return (prize, winning_color)
 
 if __name__ == "__main__":
     import sys
